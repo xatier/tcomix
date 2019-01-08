@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 """
 
 Tcomix: A terminal based comic books viewer
@@ -27,7 +26,6 @@ w3m_getsize = "5;{filename}\n"
 
 
 class Tcomix(object):
-
     def __init__(self):
 
         # test images
@@ -45,21 +43,21 @@ class Tcomix(object):
             self.win.border()
 
             self.filelist_box_width = 20
-            self.filelist_box = curses.newwin(curses.LINES,
-                                              self.filelist_box_width,
-                                              0, 0)
+            self.filelist_box = curses.newwin(
+                curses.LINES, self.filelist_box_width, 0, 0
+            )
             self.filelist_box.border()
 
             self.my, self.mx = curses.LINES, curses.COLS
-            self.cury, self.curx = self.my-2, 1
+            self.cury, self.curx = self.my - 2, 1
 
             self.fontw, self.fonth = self.get_font_dimensions()
 
         except:
             print("GG on python curses init!")
 
-        self.MAXW = self.get_screen_size()[0] - self.fontw*23
-        self.MAXH = self.get_screen_size()[1] - self.fonth*2
+        self.MAXW = self.get_screen_size()[0] - self.fontw * 23
+        self.MAXH = self.get_screen_size()[1] - self.fonth * 2
 
         self.win.refresh()
         self.filelist_box.refresh()
@@ -86,29 +84,38 @@ class Tcomix(object):
         return (w // curses.COLS), (h // curses.LINES)
 
     def draw(self, filename, x, y, w, h):
-        return self.execute_w3m(w3m_display.format(filename=filename,
-                                                   x=int((x-0.2)*self.fontw),
-                                                   y=int(y*self.fonth),
-                                                   w=w, h=h))
+        return self.execute_w3m(
+            w3m_display.format(
+                filename=filename,
+                x=int((x - 0.2) * self.fontw),
+                y=int(y * self.fonth),
+                w=w,
+                h=h
+            )
+        )
 
     def clear(self, x, y, w, h):
-        return self.execute_w3m(w3m_clear.format(x=int((x-0.2)*self.fontw),
-                                                 y=int(y*self.fonth),
-                                                 w=int(w*1.01),
-                                                 h=int(h*1.01)))
+        return self.execute_w3m(
+            w3m_clear.format(
+                x=int((x - 0.2) * self.fontw),
+                y=int(y * self.fonth),
+                w=int(w * 1.01),
+                h=int(h * 1.01)
+            )
+        )
 
     def imgfoo(self):
         return self.execute("ls ~/Pictures/*.jpg")
 
     def _norm_h(self, w, h, nw=0):
         nw = self.MAXW if nw == 0 else nw
-        h = int(nw/w * h)
+        h = int(nw / w * h)
         w = nw
         return w, h
 
     def _norm_w(self, w, h, nh=0):
         nh = self.MAXH if nh == 0 else nh
-        w = int(nh/h * w)
+        w = int(nh / h * w)
         h = nh
         return w, h
 
@@ -127,10 +134,11 @@ class Tcomix(object):
                 w, h = self._norm_w(w, h)
 
             imgview_x, imgview_y = 21, 1
-            self.draw(self.image_list[self.image_idx],
-                      imgview_x, imgview_y, w, h)
+            self.draw(
+                self.image_list[self.image_idx], imgview_x, imgview_y, w, h
+            )
 
-            self.text(">" + " "*50)
+            self.text(">" + " " * 50)
             self.text("> {}".format(self.image_list[self.image_idx]))
 
             c = self.win.getch()
@@ -151,6 +159,7 @@ class Tcomix(object):
         curses.nocbreak()
         curses.echo()
         curses.endwin()
+
 
 if __name__ == '__main__':
     tcomix = Tcomix()
