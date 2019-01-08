@@ -20,12 +20,15 @@ import subprocess
 import curses
 
 W3MIMGDISPLAY = '/usr/lib/w3m/w3mimgdisplay'
-w3m_display = "0;1;{x};{y};{w};{h};;;;;{filename}\n4;\n3;\n"
-w3m_clear = "6;{x};{y};{w};{h}\n4;\n3;\n"
-w3m_getsize = "5;{filename}\n"
+W3M_DISPLAY = "0;1;{x};{y};{w};{h};;;;;{filename}\n4;\n3;\n"
+W3M_CLEAR = "6;{x};{y};{w};{h}\n4;\n3;\n"
+W3M_GETSIZE = "5;{filename}\n"
 
 
-class Tcomix(object):
+class Tcomix:
+    """
+    Main application class, this handles everything
+    """
     def __init__(self):
 
         # test images
@@ -48,16 +51,16 @@ class Tcomix(object):
             )
             self.filelist_box.border()
 
-            self.my, self.mx = curses.LINES, curses.COLS
-            self.cury, self.curx = self.my - 2, 1
+            self.m_y, self.m_x = curses.LINES, curses.COLS
+            self.cury, self.curx = self.m_y - 2, 1
 
             self.fontw, self.fonth = self.get_font_dimensions()
 
-        except:
+        except Exception:
             print("GG on python curses init!")
 
-        self.MAXW = self.get_screen_size()[0] - self.fontw * 23
-        self.MAXH = self.get_screen_size()[1] - self.fonth * 2
+        self.max_w = self.get_screen_size()[0] - self.fontw * 23
+        self.max_h = self.get_screen_size()[1] - self.fonth * 2
 
         self.win.refresh()
         self.filelist_box.refresh()
@@ -70,7 +73,7 @@ class Tcomix(object):
         return self.execute("echo '{}' | {}".format(w3m_cmd, W3MIMGDISPLAY))
 
     def get_image_size(self, filename):
-        w, h = self.execute_w3m(w3m_getsize.format(filename=filename)).split()
+        w, h = self.execute_w3m(W3M_GETSIZE.format(filename=filename)).split()
         return int(w), int(h)
 
     def get_screen_size(self):
@@ -85,7 +88,7 @@ class Tcomix(object):
 
     def draw(self, filename, x, y, w, h):
         return self.execute_w3m(
-            w3m_display.format(
+            W3M_DISPLAY.format(
                 filename=filename,
                 x=int((x - 0.2) * self.fontw),
                 y=int(y * self.fonth),
@@ -96,7 +99,7 @@ class Tcomix(object):
 
     def clear(self, x, y, w, h):
         return self.execute_w3m(
-            w3m_clear.format(
+            W3M_CLEAR.format(
                 x=int((x - 0.2) * self.fontw),
                 y=int(y * self.fonth),
                 w=int(w * 1.01),
@@ -108,13 +111,13 @@ class Tcomix(object):
         return self.execute("ls ~/Pictures/*.jpg")
 
     def _norm_h(self, w, h, nw=0):
-        nw = self.MAXW if nw == 0 else nw
+        nw = self.max_w if nw == 0 else nw
         h = int(nw / w * h)
         w = nw
         return w, h
 
     def _norm_w(self, w, h, nh=0):
-        nh = self.MAXH if nh == 0 else nh
+        nh = self.max_h if nh == 0 else nh
         w = int(nh / h * w)
         h = nh
         return w, h
@@ -127,10 +130,10 @@ class Tcomix(object):
         while True:
             w, h = self.get_image_size(self.image_list[self.image_idx])
 
-            if w > self.MAXW:
+            if w > self.max_w:
                 w, h = self._norm_h(w, h)
 
-            if h > self.MAXH:
+            if h > self.max_h:
                 w, h = self._norm_w(w, h)
 
             imgview_x, imgview_y = 21, 1
@@ -162,5 +165,5 @@ class Tcomix(object):
 
 
 if __name__ == '__main__':
-    tcomix = Tcomix()
-    tcomix.main_loop()
+    TCOMIX = Tcomix()
+    TCOMIX.main_loop()
