@@ -16,8 +16,8 @@ reference:
 
 """
 
-import subprocess
 import curses
+import subprocess
 
 W3MIMGDISPLAY = '/usr/lib/w3m/w3mimgdisplay'
 W3M_DISPLAY = "0;1;{x};{y};{w};{h};;;;;{filename}\n4;\n3;\n"
