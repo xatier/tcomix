@@ -19,7 +19,7 @@ reference:
 import curses
 import subprocess
 
-W3MIMGDISPLAY = '/usr/lib/w3m/w3mimgdisplay'
+W3MIMGDISPLAY = "/usr/lib/w3m/w3mimgdisplay"
 W3M_DISPLAY = "0;1;{x};{y};{w};{h};;;;;{filename}\n4;\n3;\n"
 W3M_CLEAR = "6;{x};{y};{w};{h}\n4;\n3;\n"
 W3M_GETSIZE = "5;{filename}\n"
@@ -29,10 +29,10 @@ class Tcomix:
     """
     Main application class, this handles everything
     """
-    def __init__(self):
 
+    def __init__(self) -> None:
         # test images
-        self.image_list = self.imgfoo().split()
+        self.image_list: list[str] = self.imgfoo().split()
         self.image_idx = 0
 
         try:
@@ -65,68 +65,67 @@ class Tcomix:
         self.win.refresh()
         self.filelist_box.refresh()
 
-    def execute(self, cmd=""):
-        """ shell execution, super dangerous """
+    def execute(self, cmd: str = "") -> str:
+        """shell execution, super dangerous"""
         return subprocess.check_output(cmd, shell=True).decode()
 
-    def execute_w3m(self, w3m_cmd=""):
-        return self.execute("echo '{}' | {}".format(w3m_cmd, W3MIMGDISPLAY))
+    def execute_w3m(self, w3m_cmd: str = "") -> str:
+        return self.execute(f"echo '{w3m_cmd}' | {W3MIMGDISPLAY}")
 
-    def get_image_size(self, filename):
+    def get_image_size(self, filename: str) -> tuple[int, int]:
         w, h = self.execute_w3m(W3M_GETSIZE.format(filename=filename)).split()
         return int(w), int(h)
 
-    def get_screen_size(self):
-        w, h = self.execute("{} -test".format(W3MIMGDISPLAY)).split()
+    def get_screen_size(self) -> tuple[int, int]:
+        w, h = self.execute(f"{W3MIMGDISPLAY} -test").split()
         return int(w), int(h)
 
-    def get_font_dimensions(self):
+    def get_font_dimensions(self) -> tuple[int, int]:
         w, h = self.get_screen_size()
         w += 2
         h += 2
         return (w // curses.COLS), (h // curses.LINES)
 
-    def draw(self, filename, x, y, w, h):
+    def draw(self, filename: str, x: int, y: int, w: int, h: int) -> str:
         return self.execute_w3m(
             W3M_DISPLAY.format(
                 filename=filename,
                 x=int((x - 0.2) * self.fontw),
                 y=int(y * self.fonth),
                 w=w,
-                h=h
+                h=h,
             )
         )
 
-    def clear(self, x, y, w, h):
+    def clear(self, x: int, y: int, w: int, h: int) -> str:
         return self.execute_w3m(
             W3M_CLEAR.format(
                 x=int((x - 0.2) * self.fontw),
                 y=int(y * self.fonth),
                 w=int(w * 1.01),
-                h=int(h * 1.01)
+                h=int(h * 1.01),
             )
         )
 
     def imgfoo(self):
         return self.execute("ls ~/Pictures/*.jpg")
 
-    def _norm_h(self, w, h, nw=0):
+    def _norm_h(self, w: int, h: int, nw: int = 0) -> tuple[int, int]:
         nw = self.max_w if nw == 0 else nw
         h = int(nw / w * h)
         w = nw
         return w, h
 
-    def _norm_w(self, w, h, nh=0):
+    def _norm_w(self, w: int, h: int, nh: int = 0) -> tuple[int, int]:
         nh = self.max_h if nh == 0 else nh
         w = int(nh / h * w)
         h = nh
         return w, h
 
-    def text(self, txt=""):
+    def text(self, txt: str = "") -> None:
         self.win.addstr(self.cury, self.curx, txt)
 
-    def main_loop(self):
-
+    def main_loop(self) -> None:
         while True:
             w, h = self.get_image_size(self.image_list[self.image_idx])
 
@@ -137,19 +136,17 @@ class Tcomix:
                 w, h = self._norm_w(w, h)
 
             imgview_x, imgview_y = 21, 1
-            self.draw(
-                self.image_list[self.image_idx], imgview_x, imgview_y, w, h
-            )
+            self.draw(self.image_list[self.image_idx], imgview_x, imgview_y, w, h)
 
             self.text(">" + " " * 50)
-            self.text("> {}".format(self.image_list[self.image_idx]))
+            self.text(f"> {self.image_list[self.image_idx]}")
 
             c = self.win.getch()
-            if c == ord('q'):
+            if c == ord("q"):
                 break
-            elif c == curses.KEY_UP or c == ord('k'):
+            elif c in [curses.KEY_UP, ord("k")]:
                 self.image_idx += 1
-            elif c == curses.KEY_DOWN or c == ord('j'):
+            elif c in [curses.KEY_DOWN, ord("j")]:
                 self.image_idx -= 1
 
             self.image_idx %= len(self.image_list)
@@ -157,13 +154,13 @@ class Tcomix:
             self.win.refresh()
             self.filelist_box.refresh()
 
-    def __del__(self):
+    def __del__(self) -> None:
         self.win.keypad(False)
         curses.nocbreak()
         curses.echo()
         curses.endwin()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     TCOMIX = Tcomix()
     TCOMIX.main_loop()
